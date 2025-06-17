@@ -1,0 +1,28 @@
+:80 {
+    # Serve the frontend static files
+    root * /usr/share/caddy
+    
+    # Handle API requests by proxying to backend
+    handle_path /api/* {
+        reverse_proxy api:3333
+    }
+    
+    # Serve static files with SPA fallback
+    try_files {path} /index.html
+    file_server
+    
+    # Add some security headers
+    header {
+        # Enable HSTS
+        Strict-Transport-Security max-age=31536000;
+        # Prevent MIME sniffing
+        X-Content-Type-Options nosniff
+        # Prevent clickjacking
+        X-Frame-Options DENY
+        # Enable XSS protection
+        X-XSS-Protection "1; mode=block"
+    }
+    
+    # Enable compression
+    encode gzip
+}
