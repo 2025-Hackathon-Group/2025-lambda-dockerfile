@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: pdf_translator_frontend
     ports:
-      - "80:80"
+      - "5173:80"
     depends_on:
       - api
     networks:
