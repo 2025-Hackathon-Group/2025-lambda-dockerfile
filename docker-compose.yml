@@ -1,7 +1,7 @@
 services:
   frontend:
     build:
-      context: .
+      context: ./2025-lambda-pdf-translator-frontend
       dockerfile: Dockerfile
     container_name: pdf_translator_frontend
     ports:
