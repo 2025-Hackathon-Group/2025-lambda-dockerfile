@@ -1,2 +1,10 @@
-2025-lambda-pdf-translator-api
-2025-lambda-pdf-translator-frontend
+2025-lambda-pdf-translator-api/
+2025-lambda-pdf-translator-frontend/
+data/
+
+api/
+app/
+
+.env
+
+docker/s3/.minio.sys

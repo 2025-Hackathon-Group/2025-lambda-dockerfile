@@ -1,11 +1,13 @@
 services:
   frontend:
     build:
-      context: ./2025-lambda-pdf-translator-frontend
+      context: ./app
       dockerfile: Dockerfile
     container_name: pdf_translator_frontend
-    ports:
-      - "5173:80"
+    volumes:
+      - "./app:/app"
+    environment:
+      - NODE_ENV=development
     depends_on:
       - api
     networks:
@@ -14,9 +16,11 @@ services:
 
   api:
     build:
-      context: ./2025-lambda-pdf-translator-api
+      context: ./api
       dockerfile: Dockerfile.dev
     container_name: pdf_translator_api
+    volumes:
+      - "./api:/app"
     ports:
       - "3333:3333"
     depends_on:
@@ -43,7 +47,6 @@ services:
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./2025-lambda-pdf-translator-api/docker/db/psql_dump.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -70,9 +73,27 @@ services:
     command: server /data --console-address ":9001" 
     restart: unless-stopped
 
+  caddy:
+    image: caddy
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-:80}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - ./data/caddy/data:/data
+      - ./data/caddy/config:/config
+    networks:
+      pdf_translator:
+        aliases:
+          - api.local
+          - app.local
+
+
 volumes:
   postgres_data:
 
 networks:
   pdf_translator:
-    driver: bridge

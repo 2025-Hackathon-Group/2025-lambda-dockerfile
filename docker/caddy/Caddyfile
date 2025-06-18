@@ -1,0 +1,40 @@
+(log_rotation) {
+    log {
+            output file /var/log/caddy/{args[0]}.log {
+                    roll_size 1gb
+                    roll_keep 5 # days
+                    roll_keep_for 720h
+            }
+    }
+}
+
+(rewrite_symfony) {
+    root * {args[0]}
+    php_fastcgi php:9001
+    file_server
+
+    @static {
+        file
+        path *.ico *.css *.js *.gif *.jpg *.jpeg *.png *.svg *.woff *.pdf *.webp
+    }
+    
+    header @static Cache-Control max-age=5184000
+}
+
+(compression) {
+    encode zstd gzip
+}
+
+# API
+http://api.local {
+    reverse_proxy api:3333
+	import log_rotation api
+    import compression
+}
+
+# Frontend
+http://app.local {
+    reverse_proxy frontend:5173
+	import log_rotation frontend
+    import compression
+}
